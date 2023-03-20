@@ -22,18 +22,15 @@ APABaseCharacter::APABaseCharacter()
 // Called when the game starts or when spawned
 void APABaseCharacter::BeginPlay()
 {
-	Super::BeginPlay();
+    Super::BeginPlay();
 
-	check(GetCharacterMovement());
+    check(GetCharacterMovement());
     check(HealthComponent);
     check(HealthTextComponent);
 
     OnHealthChanged(HealthComponent->GetHealth());
     HealthComponent->OnDeath.AddUObject(this, &APABaseCharacter::OnDeath);
     HealthComponent->OnHealthChanged.AddUObject(this, &APABaseCharacter::OnHealthChanged);
-
-
-
 }
 
 void APABaseCharacter::Tick(float DeltaTime)
@@ -45,7 +42,7 @@ void APABaseCharacter::OnDeath ()
 {
     UE_LOG(BaseCharacterLog, Display, TEXT("Player %s is dead"), *GetName());
 
-	GetCharacterMovement()->DisableMovement();
+    GetCharacterMovement()->DisableMovement();
     SetLifeSpan(LifeSpanOnDeath);
 
 }
