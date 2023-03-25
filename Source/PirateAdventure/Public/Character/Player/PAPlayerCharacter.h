@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Character/PABaseCharacter.h"
+#include "Components/PAStaminaComponent.h"
 #include "PAPlayerCharacter.generated.h"
 
 class UCameraComponent;
+class UPAStaminaComponent;
 class USkeletalMeshComponent;
 
 UCLASS()
@@ -22,10 +24,15 @@ public:
 
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+    virtual void Tick(float DeltaTime) override;
+
 protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UCameraComponent* CameraComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    UPAStaminaComponent* StaminaComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Musket")
     USkeletalMeshComponent* MusketMesh;
@@ -45,6 +52,10 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
     float RunSpeed = 1200.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
+    float RunStaminaCost = 20.0f;
+
+    void OnStaminaChanged(float Stamina);
 
 private:
 
@@ -55,6 +66,7 @@ private:
     void TurnAround(float Amount);
 
     bool bIsMovingForward = false;
+    bool bIsRunning = false;
 
     void StartRunning();
     void StopRunning();

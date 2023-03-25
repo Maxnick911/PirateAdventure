@@ -5,6 +5,7 @@
 #include "Character/PABaseCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/PAStaminaComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(PlayerLog, All, All)
 
@@ -14,6 +15,8 @@ APAPlayerCharacter::APAPlayerCharacter()
 
     CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
     CameraComponent->SetupAttachment(GetRootComponent());
+
+    StaminaComponent = CreateDefaultSubobject<UPAStaminaComponent>("StaminaComponent");
 
     HookMesh = CreateDefaultSubobject<USkeletalMeshComponent>("HookMesh");
     HookMesh->AttachToComponent(CameraComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
@@ -27,6 +30,8 @@ void APAPlayerCharacter::BeginPlay()
     Super::BeginPlay();
 
     check(CameraComponent);
+    check(StaminaComponent);
+
 }
 
 void APAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) 
@@ -46,10 +51,23 @@ void APAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
     PlayerInputComponent->BindAction("MusketShot", IE_Pressed, this, &APAPlayerCharacter::MusketShot);
     PlayerInputComponent->BindAction("HookHit", IE_Pressed, this, &APAPlayerCharacter::HookHit);
 
-
 }
 
-void APAPlayerCharacter::MoveForward(float Amount) 
+void APAPlayerCharacter::Tick(float DeltaTime) 
+{
+    Super::Tick(DeltaTime);
+
+    if (!bIsRunning && StaminaComponent->GetStamina() >= 0.0f)
+    {
+        StartRunning();
+    }
+    else if (bIsRunning && StaminaComponent->GetStamina() <= 0.0f)
+    {
+        StopRunning();
+    }
+}
+
+void APAPlayerCharacter::MoveForward(float Amount)
 {
     if (Amount != 0.0f)
     {
@@ -81,22 +99,39 @@ void APAPlayerCharacter::TurnAround(float Amount)
 
 } 
 
+void APAPlayerCharacter::OnStaminaChanged(float Stamina)
+{
+    if (bIsRunning)
+    {
+        if (Stamina <= 0.f)
+        {
+            StopRunning();
+        }
+    }
+    else
+    {
+        if (Stamina >= StaminaComponent->GetStamina())
+        {
+            StartRunning();
+        }
+    }
+}
+
 void APAPlayerCharacter::StartRunning() 
 {
-    if (bIsMovingForward)
-    {
-        GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
-        UE_LOG(PlayerLog, Display, TEXT("Running"));
-    }
+    bIsRunning = true;
+
+    UE_LOG(PlayerLog, Display, TEXT("Start running"))
 }
 
 void APAPlayerCharacter::StopRunning() 
 {
+    bIsRunning = false;
+
     UE_LOG(PlayerLog, Display, TEXT("Stop running"))
-    GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
-void APAPlayerCharacter::StartCrouch ()
+void APAPlayerCharacter::StartCrouch()
 {
     UE_LOG(PlayerLog, Display, TEXT("Crouch"))
     Crouch();

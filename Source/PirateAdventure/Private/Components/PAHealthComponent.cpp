@@ -12,14 +12,14 @@ UPAHealthComponent::UPAHealthComponent()
 
 }
 
-bool UPAHealthComponent::IsDead()
+bool UPAHealthComponent::IsDead() const
 {
-    return FMath::IsNearlyZero(Health);
+    return FMath::IsNearlyZero(CurrentHealth);
 }
 
-float UPAHealthComponent::GetHealth()
+float UPAHealthComponent::GetHealth() const
 {
-    return Health;
+    return CurrentHealth;
 }
 
 void UPAHealthComponent::BeginPlay()
@@ -39,11 +39,11 @@ void UPAHealthComponent::BeginPlay()
 
 void UPAHealthComponent::OnTakeAnyDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-    UE_LOG(HealthComponentLog, Display, TEXT("Health: %.0f"), Health);
+    UE_LOG(HealthComponentLog, Display, TEXT("Health: %.0f"), CurrentHealth);
     if (Damage <= 0.0 || IsDead() || !GetWorld()) return;
 
-    SetHealth(Health - Damage);
-    OnHealthChanged.Broadcast(Health);
+    SetHealth(CurrentHealth - Damage);
+    OnHealthChanged.Broadcast(CurrentHealth);
 
     if (IsDead())
     {
@@ -53,6 +53,6 @@ void UPAHealthComponent::OnTakeAnyDamage(AActor* DamageActor, float Damage, cons
 
 void UPAHealthComponent::SetHealth(float NewHealth) 
 {
-    Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
-    OnHealthChanged.Broadcast(Health);
+    CurrentHealth = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
+    OnHealthChanged.Broadcast(CurrentHealth);
 }

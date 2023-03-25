@@ -40,7 +40,7 @@ protected:
     FVector2D LandedDamageVelocity = FVector2D(900.0f, 12000.0f);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
-    FVector2D LandedDamage = FVector2D(1.0f, 100.0f);
+    FVector2D LandedDamage = FVector2D(10.0f, 100.0f);
 
 	UFUNCTION()
     void OnGroundLanded(const FHitResult& Hit);

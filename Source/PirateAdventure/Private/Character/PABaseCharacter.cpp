@@ -16,7 +16,6 @@ APABaseCharacter::APABaseCharacter()
 
     HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("HealthTextComponent");
     HealthTextComponent->SetupAttachment(GetRootComponent());
-
 }
 
 // Called when the game starts or when spawned
@@ -31,6 +30,9 @@ void APABaseCharacter::BeginPlay()
     OnHealthChanged(HealthComponent->GetHealth());
     HealthComponent->OnDeath.AddUObject(this, &APABaseCharacter::OnDeath);
     HealthComponent->OnHealthChanged.AddUObject(this, &APABaseCharacter::OnHealthChanged);
+
+    LandedDelegate.AddDynamic(this, &APABaseCharacter::OnGroundLanded);
+
 }
 
 void APABaseCharacter::Tick(float DeltaTime)
@@ -44,7 +46,6 @@ void APABaseCharacter::OnDeath ()
 
     GetCharacterMovement()->DisableMovement();
     SetLifeSpan(LifeSpanOnDeath);
-
 }
 
 void APABaseCharacter::OnHealthChanged(float Health) 
@@ -61,5 +62,4 @@ void APABaseCharacter::OnGroundLanded (const FHitResult& Hit)
     TakeDamage(FallDamage, FPointDamageEvent{}, nullptr, nullptr);
 
     UE_LOG(BaseCharacterLog, Display, TEXT("Player %s recived landed damage: %f"), *GetName(), FallDamage);
-
 }

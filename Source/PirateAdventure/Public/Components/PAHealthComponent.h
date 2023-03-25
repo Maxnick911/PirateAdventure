@@ -7,7 +7,7 @@
 #include "PAHealthComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnDeathSignature);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChangedSignature, float);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class PIRATEADVENTURE_API UPAHealthComponent : public UActorComponent
@@ -18,12 +18,12 @@ public:
 	UPAHealthComponent();
 
 	FOnDeathSignature OnDeath;
-	FOnHealthChanged OnHealthChanged;
+	FOnHealthChangedSignature OnHealthChanged;
 
 	UFUNCTION(BLueprintCallable, Category = "Health")
-    bool IsDead();
+    bool IsDead() const;
 
-	float GetHealth();
+	float GetHealth() const;
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta = (ClampMin = "0", ClampMax = "1000"))
@@ -33,7 +33,7 @@ protected:
 
 private:
 
-	float Health = 0.0f;
+	float CurrentHealth = 0.0f;
 
 	UFUNCTION()
     void OnTakeAnyDamage(AActor* DamageActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
