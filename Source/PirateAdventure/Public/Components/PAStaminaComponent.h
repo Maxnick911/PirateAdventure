@@ -18,13 +18,23 @@ public:
 
     FOnStaminaChangedSignature OnStaminaChanged;
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Category = "Stamina")
     float GetStamina() const;
+
+    UFUNCTION(BlueprintCallable, Category = "Stamina")
+    void DrainStamina();
+
+    UFUNCTION(BlueprintCallable, Category = "Stamina")
+    void RecoverStamina();
+
+    UFUNCTION(BlueprintCallable, Category = "Stamina")
+    void SetStamina(float NewStamina);
+
+    UFUNCTION(BlueprintCallable, Category = "Stamina")
+    bool CanRun() const;
 
 protected:
     virtual void BeginPlay() override;
-
-    virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stamina", meta = (ClampMin = "0", ClampMax = "1000"))
     float MaxStamina = 100.0f;
@@ -33,12 +43,11 @@ protected:
     float StaminaDrainRate = 10.0f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Stamina")
-    float StaminaRegenRate = 5.0f;
-
-    void SetStamina(float NewStamina);
+    float StaminaRecoveryRate = 5.0f;
 
 private: 
+    float CurrentStamina = 0.0f;
 
-    float CurrentStamina;
-
+    FTimerHandle DrainStaminaTimerHandle;
+    FTimerHandle RecoverStaminaTimerHandle;
 };

@@ -52,9 +52,6 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
     float RunSpeed = 1200.0f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
-    float RunStaminaCost = 20.0f;
-
     void OnStaminaChanged(float Stamina);
 
 private:

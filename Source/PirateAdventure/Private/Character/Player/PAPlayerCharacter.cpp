@@ -32,6 +32,8 @@ void APAPlayerCharacter::BeginPlay()
     check(CameraComponent);
     check(StaminaComponent);
 
+    OnStaminaChanged(StaminaComponent->GetStamina());
+    StaminaComponent->OnStaminaChanged.AddUObject(this, &APAPlayerCharacter::OnStaminaChanged);
 }
 
 void APAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) 
@@ -56,15 +58,6 @@ void APAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 void APAPlayerCharacter::Tick(float DeltaTime) 
 {
     Super::Tick(DeltaTime);
-
-    if (!bIsRunning && StaminaComponent->GetStamina() >= 0.0f)
-    {
-        StartRunning();
-    }
-    else if (bIsRunning && StaminaComponent->GetStamina() <= 0.0f)
-    {
-        StopRunning();
-    }
 }
 
 void APAPlayerCharacter::MoveForward(float Amount)
@@ -101,9 +94,10 @@ void APAPlayerCharacter::TurnAround(float Amount)
 
 void APAPlayerCharacter::OnStaminaChanged(float Stamina)
 {
+    UE_LOG(PlayerLog, Display, TEXT("Stamina: %.0f"), Stamina);
     if (bIsRunning)
     {
-        if (Stamina <= 0.f)
+        if (Stamina <= 0.0f)
         {
             StopRunning();
         }
@@ -119,16 +113,24 @@ void APAPlayerCharacter::OnStaminaChanged(float Stamina)
 
 void APAPlayerCharacter::StartRunning() 
 {
-    bIsRunning = true;
-
-    UE_LOG(PlayerLog, Display, TEXT("Start running"))
+    if (StaminaComponent && StaminaComponent->CanRun())
+    {
+        bIsRunning = true;
+        GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+        StaminaComponent->DrainStamina();
+        UE_LOG(PlayerLog, Display, TEXT("Start running"))
+    }
 }
 
 void APAPlayerCharacter::StopRunning() 
 {
-    bIsRunning = false;
-
-    UE_LOG(PlayerLog, Display, TEXT("Stop running"))
+    if (StaminaComponent)
+    {
+        bIsRunning = false;
+        StaminaComponent->RecoverStamina();
+        GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+        UE_LOG(PlayerLog, Display, TEXT("Stop running"))
+    }
 }
 
 void APAPlayerCharacter::StartCrouch()
