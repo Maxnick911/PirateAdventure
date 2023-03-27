@@ -25,7 +25,7 @@ void UPAStaminaComponent::BeginPlay()
 
 void UPAStaminaComponent::DrainStamina()
 {
-    if (GetWorld() && CanRun() && CurrentStamina >= 0.0f)
+    if (GetWorld() && CanRun())
     {
         GetWorld()->GetTimerManager().SetTimer(DrainStaminaTimerHandle, this, &UPAStaminaComponent::DrainStamina, 1.0f, true);
         SetStamina(CurrentStamina - StaminaDrainRate);
@@ -34,7 +34,6 @@ void UPAStaminaComponent::DrainStamina()
     if (CurrentStamina <= 0.0f)
     {
         GetWorld()->GetTimerManager().ClearTimer(DrainStaminaTimerHandle);
-        RecoverStamina();
     }
 }
 
