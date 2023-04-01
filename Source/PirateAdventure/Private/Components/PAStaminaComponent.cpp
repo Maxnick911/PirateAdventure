@@ -5,6 +5,7 @@
 #include "TimerManager.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Character/Player/PAPlayerCharacter.h"
 
 DEFINE_LOG_CATEGORY_STATIC(StaminaComponentLog, All, All)
 
@@ -25,13 +26,23 @@ void UPAStaminaComponent::BeginPlay()
 
 void UPAStaminaComponent::DrainStamina()
 {
-    if (GetWorld() && CanRun())
+    if (GetWorld())
     {
-        GetWorld()->GetTimerManager().SetTimer(DrainStaminaTimerHandle, this, &UPAStaminaComponent::DrainStamina, 1.0f, true);
-        SetStamina(CurrentStamina - StaminaDrainRate);
+        if (CanRun() && MaxStamina / CurrentStamina >= 5.0f)
+        {
+            GetWorld()->GetTimerManager().SetTimer(DrainStaminaTimerHandle, this, &UPAStaminaComponent::DrainStamina, 0.5f, true);
+            SetStamina(CurrentStamina - StaminaDrainRate);
+        }
+        else
+        {
+            StopDrainingStamina();
+        }
     }
+}
 
-    if (CurrentStamina <= 0.0f)
+void UPAStaminaComponent::StopDrainingStamina()
+{
+    if (GetWorld())
     {
         GetWorld()->GetTimerManager().ClearTimer(DrainStaminaTimerHandle);
     }
@@ -39,13 +50,21 @@ void UPAStaminaComponent::DrainStamina()
 
 void UPAStaminaComponent::RecoverStamina()
 {
-    if (GetWorld() && CurrentStamina >= 0.0f)
+    if (GetWorld() && CurrentStamina < MaxStamina)
     {
-    GetWorld()->GetTimerManager().SetTimer(RecoverStaminaTimerHandle, this, &UPAStaminaComponent::RecoverStamina, 1.0f, true);
-    SetStamina(CurrentStamina + StaminaRecoveryRate);
+        GetWorld()->GetTimerManager().SetTimer(RecoverStaminaTimerHandle, this, &UPAStaminaComponent::RecoverStamina, 0.5f, true);
+        SetStamina(CurrentStamina + StaminaRecoveryRate);
     }
 
-    if (CurrentStamina >= MaxStamina)
+    if (CurrentStamina > MaxStamina)
+    {
+        StopRecoveringStamina();
+    }
+}
+
+void UPAStaminaComponent::StopRecoveringStamina()
+{
+    if (GetWorld())
     {
         GetWorld()->GetTimerManager().ClearTimer(RecoverStaminaTimerHandle);
     }
@@ -53,16 +72,21 @@ void UPAStaminaComponent::RecoverStamina()
 
 void UPAStaminaComponent::SetStamina(float NewStamina)
 {
-    CurrentStamina = FMath::Clamp(NewStamina, 0.0f, MaxStamina);
     OnStaminaChanged.Broadcast(CurrentStamina);
+    CurrentStamina = FMath::Clamp(NewStamina, 0.0f, MaxStamina);
 }
 
 bool UPAStaminaComponent::CanRun() const
 {
-    return CurrentStamina >= StaminaDrainRate;
+    return (CurrentStamina - StaminaDrainRate) >= 0.0f && (CurrentStamina > 0.0f);
 }
 
 float UPAStaminaComponent::GetStamina() const
 {
     return CurrentStamina;
+}
+
+float UPAStaminaComponent::GetMaxStamina() const
+{
+    return MaxStamina;
 }

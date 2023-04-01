@@ -30,9 +30,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UPAHealthComponent* HealthComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	UTextRenderComponent* HealthTextComponent;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
     float LifeSpanOnDeath = 1.0f;
 

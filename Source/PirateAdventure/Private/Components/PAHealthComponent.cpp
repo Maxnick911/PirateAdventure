@@ -39,7 +39,6 @@ void UPAHealthComponent::BeginPlay()
 
 void UPAHealthComponent::OnTakeAnyDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-    UE_LOG(HealthComponentLog, Display, TEXT("Health: %.0f"), CurrentHealth);
     if (Damage <= 0.0 || IsDead() || !GetWorld()) return;
 
     SetHealth(CurrentHealth - Damage);

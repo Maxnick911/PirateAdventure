@@ -26,6 +26,8 @@ public:
 
     virtual void Tick(float DeltaTime) override;
 
+    bool IsRunning() const { return bIsRunning; };
+
 protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")

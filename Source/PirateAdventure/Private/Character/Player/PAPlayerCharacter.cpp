@@ -32,22 +32,20 @@ void APAPlayerCharacter::BeginPlay()
     check(CameraComponent);
     check(StaminaComponent);
 
-    OnStaminaChanged(StaminaComponent->GetStamina());
     StaminaComponent->OnStaminaChanged.AddUObject(this, &APAPlayerCharacter::OnStaminaChanged);
 }
 
 void APAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) 
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
-    check(PlayerInputComponent);
 
     PlayerInputComponent->BindAxis("MoveForward", this, &APAPlayerCharacter::MoveForward);
     PlayerInputComponent->BindAxis("MoveRight", this, &APAPlayerCharacter::MoveRight);
     PlayerInputComponent->BindAxis("LookUp", this, &APAPlayerCharacter::LookUp);
     PlayerInputComponent->BindAxis("TurnAround", this, &APAPlayerCharacter::TurnAround);
-    PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &APAPlayerCharacter::Jump);
     PlayerInputComponent->BindAction("Run", IE_Pressed, this, &APAPlayerCharacter::StartRunning);
     PlayerInputComponent->BindAction("Run", IE_Released, this, &APAPlayerCharacter::StopRunning);
+    PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &APAPlayerCharacter::Jump);
     PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &APAPlayerCharacter::StartCrouch);
     PlayerInputComponent->BindAction("Crouch", IE_Released, this, &APAPlayerCharacter::StopCrouch);
     PlayerInputComponent->BindAction("MusketShot", IE_Pressed, this, &APAPlayerCharacter::MusketShot);
@@ -66,7 +64,7 @@ void APAPlayerCharacter::MoveForward(float Amount)
     {
         AddMovementInput(GetActorForwardVector(), Amount);
 
-        if (Amount >= 0.0f)
+        if (Amount > 0.0f)
         {
             bIsMovingForward = true;
         }
@@ -95,41 +93,50 @@ void APAPlayerCharacter::TurnAround(float Amount)
 void APAPlayerCharacter::OnStaminaChanged(float Stamina)
 {
     UE_LOG(PlayerLog, Display, TEXT("Stamina: %.0f"), Stamina);
-    if (bIsRunning)
+    if (bIsMovingForward)
     {
-        if (Stamina <= 0.0f)
+        if (!bIsRunning)
         {
-            StopRunning();
+            if (Stamina <= 0.0f)
+            {
+                StopRunning();
+            }
+            else if (Stamina >= StaminaComponent->GetStamina() && StaminaComponent->CanRun() && bIsRunning)
+            {
+                StartRunning();
+            }
         }
-    }
-    else
-    {
-        if (Stamina >= StaminaComponent->GetStamina())
+        else
         {
-            StartRunning();
+            if (Stamina <= 0.0f || Stamina < StaminaComponent->GetStamina() || !StaminaComponent->CanRun() || !bIsRunning)
+            {
+                StopRunning();
+            }
         }
     }
 }
 
-void APAPlayerCharacter::StartRunning() 
+void APAPlayerCharacter::StartRunning()
 {
     if (StaminaComponent && StaminaComponent->CanRun())
     {
+        UE_LOG(PlayerLog, Display, TEXT("Start Running"));
         bIsRunning = true;
         GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+        StaminaComponent->StopRecoveringStamina();
         StaminaComponent->DrainStamina();
-        UE_LOG(PlayerLog, Display, TEXT("Start running"))
     }
 }
 
-void APAPlayerCharacter::StopRunning() 
+void APAPlayerCharacter::StopRunning()
 {
     if (StaminaComponent)
     {
+        UE_LOG(PlayerLog, Display, TEXT("Stop Running"));
         bIsRunning = false;
-        StaminaComponent->RecoverStamina();
         GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-        UE_LOG(PlayerLog, Display, TEXT("Stop running"))
+        StaminaComponent->StopDrainingStamina();
+        StaminaComponent->RecoverStamina();
     }
 }
 

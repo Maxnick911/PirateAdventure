@@ -13,9 +13,6 @@ APABaseCharacter::APABaseCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
     HealthComponent = CreateDefaultSubobject<UPAHealthComponent>("HealthComponent");
-
-    HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>("HealthTextComponent");
-    HealthTextComponent->SetupAttachment(GetRootComponent());
 }
 
 // Called when the game starts or when spawned
@@ -25,7 +22,6 @@ void APABaseCharacter::BeginPlay()
 
     check(GetCharacterMovement());
     check(HealthComponent);
-    check(HealthTextComponent);
 
     OnHealthChanged(HealthComponent->GetHealth());
     HealthComponent->OnDeath.AddUObject(this, &APABaseCharacter::OnDeath);
@@ -50,7 +46,7 @@ void APABaseCharacter::OnDeath ()
 
 void APABaseCharacter::OnHealthChanged(float Health) 
 {
-    HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
+    UE_LOG(BaseCharacterLog, Display, TEXT("%s's Health: %.0f"), *GetName(), Health);
 }
 
 void APABaseCharacter::OnGroundLanded (const FHitResult& Hit)
