@@ -6,6 +6,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/PAStaminaComponent.h"
+#include "Weapon/PAMusketProjectile.h"
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY_STATIC(PlayerLog, All, All)
 
@@ -20,9 +22,15 @@ APAPlayerCharacter::APAPlayerCharacter()
 
     HookMesh = CreateDefaultSubobject<USkeletalMeshComponent>("HookMesh");
     HookMesh->AttachToComponent(CameraComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+    HookMesh->CastShadow = false;
 
     MusketMesh = CreateDefaultSubobject<USkeletalMeshComponent>("MusketMesh");
     MusketMesh->AttachToComponent(CameraComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+    MusketMesh->CastShadow = false;
+
+    MuzzleSocketLocation = MusketMesh->GetSocketLocation("MuzzleSocket");
+
+
 }
 
 void APAPlayerCharacter::BeginPlay() 
@@ -155,11 +163,38 @@ void APAPlayerCharacter::StopCrouch()
 void APAPlayerCharacter::MusketShot() 
 {
     UE_LOG(PlayerLog, Warning, TEXT("SHOT"));
+    // try and fire a projectile
+    if (ProjectileClass != nullptr)
+    {
+        UWorld* const World = GetWorld();
+        if (World != nullptr)
+        {
+            const FRotator SpawnRotation = GetControlRotation();
+
+            const FVector SpawnLocation = ((MuzzleSocketLocation.IsZero()) ? MuzzleSocketLocation : GetActorLocation());
+
+            FActorSpawnParameters ActorSpawnParams;
+            ActorSpawnParams.SpawnCollisionHandlingOverride =
+                ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+
+            World->SpawnActor<APAMusketProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+        }
+    }
+
+    if (MusketShotSound != nullptr)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, MusketShotSound, GetActorLocation());
+    }
 }
 
 void APAPlayerCharacter::HookHit() 
 {
     UE_LOG(PlayerLog, Warning, TEXT("HIT"));
+
+    if (HookHitSound != nullptr)
+    {
+        UGameplayStatics::PlaySoundAtLocation(this, HookHitSound, GetActorLocation());
+    }
 }
 
 void APAPlayerCharacter::OnDeath() 

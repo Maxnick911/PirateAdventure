@@ -10,6 +10,7 @@
 class UCameraComponent;
 class UPAStaminaComponent;
 class USkeletalMeshComponent;
+class APAMusketProjectile;
 
 UCLASS()
 class PIRATEADVENTURE_API APAPlayerCharacter : public APABaseCharacter
@@ -39,14 +40,26 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Musket")
     USkeletalMeshComponent* MusketMesh;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Musket")
+    float MusketShotAnimationDelay = 0.3f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Musket")
+    USoundBase* MusketShotSound;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Musket")
+    FVector MuzzleSocketLocation;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Musket")
+    TSubclassOf<class APAMusketProjectile> ProjectileClass;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hook")
     USkeletalMeshComponent* HookMesh;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Musket")
-    float MusketShotAnimationDelay = 0.3;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hook")
+    USoundBase* HookHitSound;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hook")
-    float HookHitAnimationDelay = 0.6;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hook")
+    float HookHitAnimationDelay = 0.6f;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
     float WalkSpeed = 600.0f;
@@ -78,4 +91,5 @@ private:
 
     UFUNCTION(BlueprintCallable)
     void HookHit();
+
 };
