@@ -13,6 +13,8 @@ APABaseCharacter::APABaseCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
     HealthComponent = CreateDefaultSubobject<UPAHealthComponent>("HealthComponent");
+    check(HealthComponent != nullptr);
+
 }
 
 // Called when the game starts or when spawned
@@ -21,7 +23,6 @@ void APABaseCharacter::BeginPlay()
     Super::BeginPlay();
 
     check(GetCharacterMovement());
-    check(HealthComponent);
 
     OnHealthChanged(HealthComponent->GetHealth());
     HealthComponent->OnDeath.AddUObject(this, &APABaseCharacter::OnDeath);

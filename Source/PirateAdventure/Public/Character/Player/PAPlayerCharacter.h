@@ -46,9 +46,6 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Musket")
     USoundBase* MusketShotSound;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Musket")
-    FVector MuzzleSocketLocation;
-
     UPROPERTY(EditDefaultsOnly, Category = "Musket")
     TSubclassOf<class APAMusketProjectile> ProjectileClass;
 

@@ -17,14 +17,8 @@ class PIRATEADVENTURE_API APAMusketProjectile : public AActor
 public:
     APAMusketProjectile();
 
-    UFUNCTION()
-    void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse,
-        const FHitResult& Hit);
+    void Tick(float DeltaTime) override;
 
-    USphereComponent* GetCollisionComponent() const { return CollisionComponent; }
-    UProjectileMovementComponent* GetProjectileMovement() const { return ProjectileMovementComponent; }
-
-protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement")
     UProjectileMovementComponent* ProjectileMovementComponent;
 
@@ -32,7 +26,17 @@ protected:
     USphereComponent* CollisionComponent;
 
     UPROPERTY(VisibleDefaultsOnly, Category = "Components")
-    UStaticMeshComponent* ProjectileMesh;
+    UStaticMeshComponent* ProjectileMeshComponent;
 
+    UFUNCTION()
+    void FireInDirection(const FVector& ShootDirection);
+
+UFUNCTION()
+    void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse,
+        const FHitResult& Hit);
+
+
+protected:
+    void BeginPlay() override;
 
 };

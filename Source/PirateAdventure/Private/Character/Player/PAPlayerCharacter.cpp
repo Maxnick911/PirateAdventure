@@ -17,28 +17,25 @@ APAPlayerCharacter::APAPlayerCharacter()
 
     CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
     CameraComponent->SetupAttachment(GetRootComponent());
+    check(CameraComponent != nullptr);
 
     StaminaComponent = CreateDefaultSubobject<UPAStaminaComponent>("StaminaComponent");
 
     HookMesh = CreateDefaultSubobject<USkeletalMeshComponent>("HookMesh");
     HookMesh->AttachToComponent(CameraComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
     HookMesh->CastShadow = false;
+    check(HookMesh != nullptr);
 
     MusketMesh = CreateDefaultSubobject<USkeletalMeshComponent>("MusketMesh");
     MusketMesh->AttachToComponent(CameraComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
     MusketMesh->CastShadow = false;
-
-    MuzzleSocketLocation = MusketMesh->GetSocketLocation("MuzzleSocket");
-
+    check(MusketMesh != nullptr);
 
 }
 
 void APAPlayerCharacter::BeginPlay() 
 {
     Super::BeginPlay();
-
-    check(CameraComponent);
-    check(StaminaComponent);
 
     StaminaComponent->OnStaminaChanged.AddUObject(this, &APAPlayerCharacter::OnStaminaChanged);
 }
@@ -163,21 +160,25 @@ void APAPlayerCharacter::StopCrouch()
 void APAPlayerCharacter::MusketShot() 
 {
     UE_LOG(PlayerLog, Warning, TEXT("SHOT"));
-    // try and fire a projectile
+
     if (ProjectileClass != nullptr)
     {
         UWorld* const World = GetWorld();
         if (World != nullptr)
         {
-            const FRotator SpawnRotation = GetControlRotation();
+            const FRotator SpawnRotation = MusketMesh->GetSocketRotation("MuzzleSocket");
 
-            const FVector SpawnLocation = ((MuzzleSocketLocation.IsZero()) ? MuzzleSocketLocation : GetActorLocation());
+            const FVector SpawnLocation = MusketMesh->GetSocketLocation("MuzzleSocket");
 
             FActorSpawnParameters ActorSpawnParams;
-            ActorSpawnParams.SpawnCollisionHandlingOverride =
-                ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+            ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 
-            World->SpawnActor<APAMusketProjectile>(ProjectileClass, SpawnLocation, SpawnRotation, ActorSpawnParams);
+            APAMusketProjectile* Projectile = World->SpawnActor<APAMusketProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
+            if (Projectile)
+            {
+                FVector LaunchDirection = SpawnRotation.Vector();
+                Projectile->FireInDirection(LaunchDirection);
+            }
         }
     }
 

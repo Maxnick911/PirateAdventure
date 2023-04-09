@@ -6,33 +6,53 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-// Sets default values
 APAMusketProjectile::APAMusketProjectile()
 {
-	PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bCanEverTick = true;
 
-    CollisionComponent = CreateDefaultSubobject<USphereComponent>("SphereComponent");
-    CollisionComponent->InitSphereRadius(5.0f);
-    CollisionComponent->BodyInstance.SetCollisionProfileName("Projectile");
-    CollisionComponent->OnComponentHit.AddDynamic(this, &APAMusketProjectile::OnHit); 
+    if (!RootComponent)
+    {
+        RootComponent = CreateDefaultSubobject<USceneComponent>("ProjectileSceneComponent");
+    }
 
-    CollisionComponent->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
-    CollisionComponent->CanCharacterStepUpOn = ECB_No;
+    if (!CollisionComponent)
+    {
+        CollisionComponent = CreateDefaultSubobject<USphereComponent>("SphereComponent");
+        CollisionComponent->InitSphereRadius(10.0f);
+        RootComponent = CollisionComponent;
+    }
 
-    RootComponent = CollisionComponent;
+    if (!ProjectileMovementComponent)
+    {
+        ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");
+        ProjectileMovementComponent->SetUpdatedComponent(CollisionComponent);
+        ProjectileMovementComponent->InitialSpeed = 10000.0f;
+        ProjectileMovementComponent->MaxSpeed = 10000.0f;
+        ProjectileMovementComponent->bRotationFollowsVelocity = true;
+        ProjectileMovementComponent->bShouldBounce = true;
+        ProjectileMovementComponent->Bounciness = 0.3f;
+        ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
+    }
 
-    ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>("ProjectileMesh");
-    ProjectileMesh->SetupAttachment(GetRootComponent());
+    if (!ProjectileMeshComponent)
+    {
+        ProjectileMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("ProjectileMeshComponent");
+        ProjectileMeshComponent->SetupAttachment(RootComponent);
+    }
 
-    ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");
-    ProjectileMovementComponent->UpdatedComponent = CollisionComponent;
-    ProjectileMovementComponent->InitialSpeed = 3000.f;
-    ProjectileMovementComponent->MaxSpeed = 3000.f;
-    ProjectileMovementComponent->bRotationFollowsVelocity = true;
-    ProjectileMovementComponent->bShouldBounce = true;
+    InitialLifeSpan = 2.0f;
+}
 
-    // Die after 3 seconds by default
-    InitialLifeSpan = 3.0f;
+void APAMusketProjectile::BeginPlay()
+{
+    Super::BeginPlay();
+
+}
+
+void APAMusketProjectile::Tick(float DeltaTime) 
+{
+    Super::Tick(DeltaTime);
+
 }
 
 void APAMusketProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent,
@@ -44,4 +64,9 @@ void APAMusketProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* Other
     }
 
     Destroy();
+}
+
+void APAMusketProjectile::FireInDirection(const FVector& ShootDirection)
+{
+    ProjectileMovementComponent->Velocity = ShootDirection * ProjectileMovementComponent->InitialSpeed;
 }
