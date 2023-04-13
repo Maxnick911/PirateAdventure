@@ -31,7 +31,7 @@ protected:
 	UPAHealthComponent* HealthComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
-    float LifeSpanOnDeath = 1.0f;
+    float LifeSpanOnDeath = 0.5f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Damage")
     FVector2D LandedDamageVelocity = FVector2D(900.0f, 12000.0f);

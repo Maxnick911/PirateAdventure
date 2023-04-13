@@ -8,6 +8,7 @@
 #include "Components/PAStaminaComponent.h"
 #include "Weapon/PAMusketProjectile.h"
 #include "Kismet/GameplayStatics.h"
+#include <Kismet/KismetMathLibrary.h>
 
 DEFINE_LOG_CATEGORY_STATIC(PlayerLog, All, All)
 
@@ -184,7 +185,7 @@ void APAPlayerCharacter::MusketShot()
 
     if (MusketShotSound != nullptr)
     {
-        UGameplayStatics::PlaySoundAtLocation(this, MusketShotSound, GetActorLocation());
+        UGameplayStatics::PlaySoundAtLocation(this, MusketShotSound, MusketMesh->GetSocketLocation("MuzzleSocket"));
     }
 }
 

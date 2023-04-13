@@ -5,6 +5,7 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/Canvas.h"
 
 APAMusketProjectile::APAMusketProjectile()
 {
@@ -26,8 +27,8 @@ APAMusketProjectile::APAMusketProjectile()
     {
         ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");
         ProjectileMovementComponent->SetUpdatedComponent(CollisionComponent);
-        ProjectileMovementComponent->InitialSpeed = 10000.0f;
-        ProjectileMovementComponent->MaxSpeed = 10000.0f;
+        ProjectileMovementComponent->InitialSpeed = 5000.0f;
+        ProjectileMovementComponent->MaxSpeed = 5000.0f;
         ProjectileMovementComponent->bRotationFollowsVelocity = true;
         ProjectileMovementComponent->bShouldBounce = true;
         ProjectileMovementComponent->Bounciness = 0.3f;

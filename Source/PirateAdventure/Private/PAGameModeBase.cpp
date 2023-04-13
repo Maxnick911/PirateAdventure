@@ -7,6 +7,6 @@ APAGameModeBase::APAGameModeBase()
 {
     DefaultPawnClass = APABaseCharacter::StaticClass();
     PlayerControllerClass = APABaseCharacter::StaticClass();
-
+    HUDClass = APABaseCharacter::StaticClass();
 }
 
