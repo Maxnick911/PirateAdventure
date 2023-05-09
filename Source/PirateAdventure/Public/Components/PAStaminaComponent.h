@@ -22,6 +22,9 @@ public:
     float GetStamina() const;
 
     UFUNCTION(BlueprintCallable, Category = "Stamina")
+    float GetStaminaPercent() const { return CurrentStamina / MaxStamina; }
+
+    UFUNCTION(BlueprintCallable, Category = "Stamina")
     float GetMaxStamina() const;
 
     UFUNCTION(BlueprintCallable, Category = "Stamina")
@@ -46,13 +49,13 @@ protected:
     virtual void BeginPlay() override;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stamina", meta = (ClampMin = "0", ClampMax = "1000"))
-    float MaxStamina = 10.0f;
+    float MaxStamina = 100.0f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Stamina")
-    float StaminaDrainRate = 2.0f;
+    float StaminaDrainRate = 10.0f;
 
     UPROPERTY(EditDefaultsOnly, Category = "Stamina")
-    float StaminaRecoveryRate = 1.0f;
+    float StaminaRecoveryRate = 5.0f;
 
 private: 
     float CurrentStamina = 0.0f;

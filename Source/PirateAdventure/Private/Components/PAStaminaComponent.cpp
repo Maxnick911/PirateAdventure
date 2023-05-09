@@ -28,7 +28,7 @@ void UPAStaminaComponent::DrainStamina()
 {
     if (GetWorld())
     {
-        if (CanRun() && MaxStamina / CurrentStamina >= 5.0f)
+        if (CanRun() && MaxStamina / CurrentStamina >= 0.0f)
         {
             GetWorld()->GetTimerManager().SetTimer(DrainStaminaTimerHandle, this, &UPAStaminaComponent::DrainStamina, 0.5f, true);
             SetStamina(CurrentStamina - StaminaDrainRate);
@@ -78,7 +78,7 @@ void UPAStaminaComponent::SetStamina(float NewStamina)
 
 bool UPAStaminaComponent::CanRun() const
 {
-    return (CurrentStamina - StaminaDrainRate) >= 0.0f && (CurrentStamina > 0.0f);
+    return (CurrentStamina > StaminaDrainRate);
 }
 
 float UPAStaminaComponent::GetStamina() const

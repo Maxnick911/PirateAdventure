@@ -20,10 +20,13 @@ public:
 	FOnDeathSignature OnDeath;
 	FOnHealthChangedSignature OnHealthChanged;
 
-	UFUNCTION(BLueprintCallable, Category = "Health")
+	UFUNCTION(BlueprintCallable, Category = "Health")
     bool IsDead() const;
 
 	float GetHealth() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+    float GetHealthPercent() const { return CurrentHealth / MaxHealth; }
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta = (ClampMin = "0", ClampMax = "1000"))

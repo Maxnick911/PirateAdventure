@@ -4,70 +4,54 @@
 #include "Weapon/PAMusketProjectile.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
-#include "Kismet/GameplayStatics.h"
-#include "Engine/Canvas.h"
+#include <Kismet/GameplayStatics.h>
+#include <GameFramework/CharacterMovementComponent.h>
 
 APAMusketProjectile::APAMusketProjectile()
 {
-    PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = false;
 
-    if (!RootComponent)
-    {
-        RootComponent = CreateDefaultSubobject<USceneComponent>("ProjectileSceneComponent");
-    }
 
-    if (!CollisionComponent)
-    {
-        CollisionComponent = CreateDefaultSubobject<USphereComponent>("SphereComponent");
-        CollisionComponent->InitSphereRadius(10.0f);
-        RootComponent = CollisionComponent;
-    }
+    CollisionComponent = CreateDefaultSubobject<USphereComponent>("CollisionComponent");
+    CollisionComponent->InitSphereRadius(5.0f);
+    CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+    CollisionComponent->SetGenerateOverlapEvents(true);
+    CollisionComponent->OnComponentHit.AddDynamic(this, &APAMusketProjectile::OnProjectileHit);
+    SetRootComponent(CollisionComponent);
 
-    if (!ProjectileMovementComponent)
-    {
-        ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");
-        ProjectileMovementComponent->SetUpdatedComponent(CollisionComponent);
-        ProjectileMovementComponent->InitialSpeed = 5000.0f;
-        ProjectileMovementComponent->MaxSpeed = 5000.0f;
-        ProjectileMovementComponent->bRotationFollowsVelocity = true;
-        ProjectileMovementComponent->bShouldBounce = true;
-        ProjectileMovementComponent->Bounciness = 0.3f;
-        ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
-    }
+    MovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMovementComponent");
+    MovementComponent->InitialSpeed = 2000.0f;
+    MovementComponent->ProjectileGravityScale = 0.0f;
 
-    if (!ProjectileMeshComponent)
-    {
-        ProjectileMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>("ProjectileMeshComponent");
-        ProjectileMeshComponent->SetupAttachment(RootComponent);
-    }
-
-    InitialLifeSpan = 2.0f;
 }
 
-void APAMusketProjectile::BeginPlay()
+void APAMusketProjectile::BeginPlay() 
 {
     Super::BeginPlay();
 
-}
-
-void APAMusketProjectile::Tick(float DeltaTime) 
-{
-    Super::Tick(DeltaTime);
+    MovementComponent->Velocity = ShotDirection * MovementComponent->InitialSpeed;
+    SetLifeSpan(ProjectileLifeTime);
 
 }
 
-void APAMusketProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent,
-    FVector NormalImpulse, const FHitResult& Hit)
+void APAMusketProjectile::OnProjectileHit(
+    UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-    if (OtherActor != this && OtherComponent->IsSimulatingPhysics())
+    if (GetWorld())
     {
-        OtherComponent->AddImpulseAtLocation(ProjectileMovementComponent->Velocity * 100.0f, Hit.ImpactPoint);
+        MovementComponent->StopMovementImmediately();
+
+        UGameplayStatics::ApplyPointDamage(
+            OtherActor, DamageAmount, Hit.ImpactNormal, Hit, UGameplayStatics::GetPlayerController(GetWorld(), 0), this, nullptr);
+
+        UCharacterMovementComponent* OtherCharacterMovement = OtherActor->FindComponentByClass<UCharacterMovementComponent>();
+        if (OtherCharacterMovement)
+        {
+            FVector ImpulseDirection = (OtherActor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+            OtherCharacterMovement->AddImpulse(ImpulseDirection * OnProjectileHitImpulseMagnitude, false);
+        }
+
+        Destroy();
     }
-
-    Destroy();
-}
-
-void APAMusketProjectile::FireInDirection(const FVector& ShootDirection)
-{
-    ProjectileMovementComponent->Velocity = ShootDirection * ProjectileMovementComponent->InitialSpeed;
 }

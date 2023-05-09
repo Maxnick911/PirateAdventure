@@ -4,7 +4,9 @@
 #include "Character/PABaseCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/PAHealthComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/TextRenderComponent.h"
+#include <Kismet/GameplayStatics.h>
 
 DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All, All)
 
@@ -17,7 +19,6 @@ APABaseCharacter::APABaseCharacter()
 
 }
 
-// Called when the game starts or when spawned
 void APABaseCharacter::BeginPlay()
 {
     Super::BeginPlay();
@@ -39,10 +40,14 @@ void APABaseCharacter::Tick(float DeltaTime)
 
 void APABaseCharacter::OnDeath ()
 {
-    UE_LOG(BaseCharacterLog, Display, TEXT("Player %s is dead"), *GetName());
+    UE_LOG(BaseCharacterLog, Display, TEXT("%s is dead"), *GetName());
 
     GetCharacterMovement()->DisableMovement();
     SetLifeSpan(LifeSpanOnDeath);
+
+    GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+    UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
 }
 
 void APABaseCharacter::OnHealthChanged(float Health) 
@@ -58,5 +63,5 @@ void APABaseCharacter::OnGroundLanded (const FHitResult& Hit)
     const auto FallDamage = FMath::GetMappedRangeValueClamped(LandedDamageVelocity, LandedDamage, FallVelocityZ);
     TakeDamage(FallDamage, FPointDamageEvent{}, nullptr, nullptr);
 
-    UE_LOG(BaseCharacterLog, Display, TEXT("Player %s recived landed damage: %f"), *GetName(), FallDamage);
+    UE_LOG(BaseCharacterLog, Display, TEXT("%s recived landed damage: %f"), *GetName(), FallDamage);
 }

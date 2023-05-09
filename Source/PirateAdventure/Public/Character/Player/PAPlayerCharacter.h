@@ -21,7 +21,6 @@ public:
     APAPlayerCharacter();
 
     virtual void BeginPlay() override;
-    virtual void OnDeath() override;
 
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -46,7 +45,7 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Musket")
     USoundBase* MusketShotSound;
 
-    UPROPERTY(EditDefaultsOnly, Category = "Musket")
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Musket")
     TSubclassOf<class APAMusketProjectile> ProjectileClass;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hook")
@@ -57,6 +56,9 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hook")
     float HookHitAnimationDelay = 0.6f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hook")
+    float HookDamageAmount = 45.0f;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
     float WalkSpeed = 600.0f;
@@ -88,5 +90,4 @@ private:
 
     UFUNCTION(BlueprintCallable)
     void HookHit();
-
 };
