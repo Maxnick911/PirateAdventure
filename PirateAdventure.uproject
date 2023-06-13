@@ -10,8 +10,33 @@
 			"LoadingPhase": "Default",
 			"AdditionalDependencies": [
 				"Engine",
-				"UMG"
+				"UMG",
+				"AIModule",
+				"FunctionalTesting",
+				"FunctionalTestingEditor"
 			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "EditorTests",
+			"Enabled": true
+		},
+		{
+			"Name": "FunctionalTestingEditor",
+			"Enabled": true
+		},
+		{
+			"Name": "NetcodeUnitTest",
+			"Enabled": true
+		},
+		{
+			"Name": "NUTUnrealEngine4",
+			"Enabled": true
+		},
+		{
+			"Name": "RuntimeTests",
+			"Enabled": true
 		}
 	]
 }

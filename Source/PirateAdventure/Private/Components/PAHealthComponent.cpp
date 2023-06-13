@@ -3,13 +3,9 @@
 #include "Components/PAHealthComponent.h"
 #include "GameFramework/Actor.h"
 
-DEFINE_LOG_CATEGORY_STATIC(HealthComponentLog, All, All)
-
 UPAHealthComponent::UPAHealthComponent()
 {
-
 	PrimaryComponentTick.bCanEverTick = false;
-
 }
 
 bool UPAHealthComponent::IsDead() const
@@ -35,6 +31,12 @@ void UPAHealthComponent::BeginPlay()
     {
         ComponentOwner->OnTakeAnyDamage.AddDynamic(this, &UPAHealthComponent::OnTakeAnyDamage);
     }
+}
+
+void UPAHealthComponent::AddHealth(float HealthAmount)
+{
+    SetHealth(CurrentHealth + HealthAmount);
+    OnHealthChanged.Broadcast(CurrentHealth);
 }
 
 void UPAHealthComponent::OnTakeAnyDamage(AActor* DamageActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)

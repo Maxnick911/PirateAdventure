@@ -20,10 +20,13 @@ public:
 
     virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION()
+	virtual void OnDeath();
+
+
 protected:
 
 	virtual void BeginPlay() override;
-	virtual void OnDeath();
 
 	void OnHealthChanged(float Health);
 

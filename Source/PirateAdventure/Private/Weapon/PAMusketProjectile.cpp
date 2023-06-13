@@ -42,8 +42,7 @@ void APAMusketProjectile::OnProjectileHit(
     {
         MovementComponent->StopMovementImmediately();
 
-        UGameplayStatics::ApplyPointDamage(
-            OtherActor, DamageAmount, Hit.ImpactNormal, Hit, UGameplayStatics::GetPlayerController(GetWorld(), 0), this, nullptr);
+        UGameplayStatics::ApplyPointDamage(OtherActor, DamageAmount, Hit.ImpactNormal, Hit, UGameplayStatics::GetPlayerController(GetWorld(), 0), this, nullptr);
 
         UCharacterMovementComponent* OtherCharacterMovement = OtherActor->FindComponentByClass<UCharacterMovementComponent>();
         if (OtherCharacterMovement)
@@ -51,7 +50,6 @@ void APAMusketProjectile::OnProjectileHit(
             FVector ImpulseDirection = (OtherActor->GetActorLocation() - GetActorLocation()).GetSafeNormal();
             OtherCharacterMovement->AddImpulse(ImpulseDirection * OnProjectileHitImpulseMagnitude, false);
         }
-
         Destroy();
     }
 }

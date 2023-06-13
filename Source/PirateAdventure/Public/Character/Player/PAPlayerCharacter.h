@@ -8,9 +8,12 @@
 #include "PAPlayerCharacter.generated.h"
 
 class UCameraComponent;
+class UPAHealthComponent;
 class UPAStaminaComponent;
 class USkeletalMeshComponent;
 class APAMusketProjectile;
+class APAMusket;
+class APAHook;
 
 UCLASS()
 class PIRATEADVENTURE_API APAPlayerCharacter : public APABaseCharacter
@@ -26,7 +29,13 @@ public:
 
     virtual void Tick(float DeltaTime) override;
 
-    bool IsRunning() const { return bIsRunning; };
+    void OnDeath() override;
+
+    bool IsRunning() const { return bIsRunning; }
+    APAMusket* GetMusket() const { return Musket; }
+
+    UPAHealthComponent* GetHealthComponent() const { return HealthComponent; }
+    UPAStaminaComponent* GetStaminaComponent() const { return StaminaComponent; }
 
 protected:
 
@@ -36,29 +45,17 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
     UPAStaminaComponent* StaminaComponent;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    TSubclassOf<APAMusket> MusketClass;
+
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Musket")
     USkeletalMeshComponent* MusketMesh;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Musket")
-    float MusketShotAnimationDelay = 0.3f;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Musket")
-    USoundBase* MusketShotSound;
-
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Musket")
-    TSubclassOf<class APAMusketProjectile> ProjectileClass;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+    TSubclassOf<APAHook> HookClass;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Hook")
     USkeletalMeshComponent* HookMesh;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hook")
-    USoundBase* HookHitSound;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hook")
-    float HookHitAnimationDelay = 0.6f;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hook")
-    float HookDamageAmount = 45.0f;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
     float WalkSpeed = 600.0f;
@@ -66,9 +63,13 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Movement")
     float RunSpeed = 1200.0f;
 
-    void OnStaminaChanged(float Stamina);
-
 private:
+
+    APAMusket* Musket;
+    APAHook* Hook;
+
+    bool bIsMovingForward = false;
+    bool bIsRunning = false;
 
     void MoveForward(float Amount);
     void MoveRight(float Amount);
@@ -76,8 +77,7 @@ private:
     void LookUp(float Amount);
     void TurnAround(float Amount);
 
-    bool bIsMovingForward = false;
-    bool bIsRunning = false;
+    void OnStaminaChanged(float Stamina);
 
     void StartRunning();
     void StopRunning();
@@ -85,9 +85,13 @@ private:
     void StartCrouch();
     void StopCrouch();
 
-    UFUNCTION(BlueprintCallable)
+    void SpawnMusket();
+    void SpawnHook();
+
     void MusketShot();
 
-    UFUNCTION(BlueprintCallable)
+    void MusketReload();
+
     void HookHit();
 };
+

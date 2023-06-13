@@ -8,11 +8,30 @@ public class PirateAdventure : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
+		PublicDependencyModuleNames.AddRange(new string[] 
+		{
+			"Core",		
+			"CoreUObject",	
+			"Engine", 
+			"InputCore",
+			"GameplayTasks",
+			"NavigationSystem"
+		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
-		PublicIncludePaths.AddRange(new string[] { "PirateAdventure/Character", "PirateAdventure/Character/Player", "PirateAdventure/Development", "PirateAdventure/Components", "PirateAdventure/UI" });
+		PublicIncludePaths.AddRange(new string[] 
+		{
+			"PirateAdventure/Public/Character",
+			"PirateAdventure/Public/Character/Enemy",
+			"PirateAdventure/Public/Character/Enemy/Tasks",
+			"PirateAdventure/Public/Character/Player",
+			"PirateAdventure/Public/Components",
+			"PirateAdventure/Public/Development",
+			"PirateAdventure/Public/Pickups",
+			"PirateAdventure/Public/UI",
+			"PirateAdventure/Public/Weapon"
+		});
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

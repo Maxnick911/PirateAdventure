@@ -6,6 +6,9 @@
 #include "Character/PABaseCharacter.h"
 #include "PAEnemyCharacter.generated.h"
 
+class UPAHealthComponent;
+class USoundBase;
+class UAnimMontage;
 
 UCLASS()
 class PIRATEADVENTURE_API APAEnemyCharacter : public APABaseCharacter
@@ -15,10 +18,20 @@ class PIRATEADVENTURE_API APAEnemyCharacter : public APABaseCharacter
 public:
 	APAEnemyCharacter();
 
-	virtual void BeginPlay() override;
-    virtual void OnDeath() override;
-    virtual void Tick(float DeltaTime) override;
+    void Attack(APawn* Target);
 
 protected:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+    float DamageAmount = 20.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    USoundBase* AttackSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+    UAnimMontage* AttackAnimation;
+
+private:
+	void PlayAttackSound();
+    void PlayAttackAnimation();
 
 };

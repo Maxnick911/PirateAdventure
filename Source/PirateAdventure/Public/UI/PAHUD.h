@@ -17,9 +17,12 @@ class PIRATEADVENTURE_API APAHUD : public AHUD
 public:
     void DrawHUD() override;
 
-    protected:
+protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> PlayerHUDWidgetClass;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
+    TSubclassOf<UUserWidget> PauseWidgetClass;
 
     virtual void BeginPlay() override;
 

@@ -5,6 +5,9 @@
 
 #include "Components/PAHealthComponent.h"
 #include "Components/PAStaminaComponent.h"
+#include <Character/Player/PAPlayerCharacter.h>
+#include <Kismet/GameplayStatics.h>
+#include "Weapon/PAMusket.h"
 
 float UPAPlayerHUDWidget::GetHealthPercent() const
 {
@@ -40,4 +43,15 @@ float UPAPlayerHUDWidget::GetStaminaPercent() const
     }
 
     return StaminaComponent->GetStaminaPercent();
+}
+
+bool UPAPlayerHUDWidget::GetMusketAmmoData(FAmmoData& AmmoData) const
+{
+    const APAPlayerCharacter* PlayerCharacter = Cast<APAPlayerCharacter>(GetOwningPlayerPawn());
+    if (!PlayerCharacter) return false;
+
+    const APAMusket* Musket = PlayerCharacter->GetMusket();
+    if (!Musket) return false;
+
+    return Musket->GetMusketAmmoData(AmmoData);
 }

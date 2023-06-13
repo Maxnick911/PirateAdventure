@@ -2,24 +2,34 @@
 
 
 #include "Character/Enemy/PAEnemyCharacter.h"
-#include "Kismet/GameplayStatics.h"
+#include "Components/PAHealthComponent.h"
+#include "Character/Enemy/PAEnemyAIController.h"
+#include "Character/Player/PAPlayerCharacter.h"
+#include <Kismet/GameplayStatics.h>
 
 APAEnemyCharacter::APAEnemyCharacter() 
 {
-
+    AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+    AIControllerClass = APAEnemyAIController::StaticClass();
 }
 
-void APAEnemyCharacter::BeginPlay()
+void APAEnemyCharacter::Attack(APawn* Target)
 {
-    Super::BeginPlay();
+    if (!Target) return;
+    UGameplayStatics::ApplyDamage(Target, DamageAmount, GetController(), this, UDamageType::StaticClass());
+
+    PlayAttackSound();
+    PlayAttackAnimation();
 }
 
-void APAEnemyCharacter::OnDeath() 
+void APAEnemyCharacter::PlayAttackSound()
 {
-    Super::OnDeath();
+    if (!AttackSound) return;
+    UGameplayStatics::PlaySoundAtLocation(this, AttackSound, GetActorLocation());
 }
 
-void APAEnemyCharacter::Tick(float DeltaTime) 
+void APAEnemyCharacter::PlayAttackAnimation()
 {
-    Super::Tick(DeltaTime);
+    if (!AttackAnimation) return;
+    GetMesh()->PlayAnimation(AttackAnimation, false);
 }

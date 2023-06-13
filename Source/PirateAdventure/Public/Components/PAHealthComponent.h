@@ -28,6 +28,13 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Health")
     float GetHealthPercent() const { return CurrentHealth / MaxHealth; }
 
+	void SetHealth(float NewHealth);
+    void AddHealth(float HealthAmount);
+
+	UFUNCTION()
+    void OnTakeAnyDamage(AActor* DamageActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
+
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta = (ClampMin = "0", ClampMax = "1000"))
     float MaxHealth = 100.0f;
@@ -38,9 +45,7 @@ private:
 
 	float CurrentHealth = 0.0f;
 
-	UFUNCTION()
-    void OnTakeAnyDamage(AActor* DamageActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
-	void SetHealth(float NewHealth);
+
 
 };

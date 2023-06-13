@@ -3,12 +3,6 @@
 #include "Components/PAStaminaComponent.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
-#include "GameFramework/Character.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "Character/Player/PAPlayerCharacter.h"
-
-DEFINE_LOG_CATEGORY_STATIC(StaminaComponentLog, All, All)
-
 
 UPAStaminaComponent::UPAStaminaComponent()
 {

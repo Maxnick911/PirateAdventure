@@ -6,67 +6,70 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/PAStaminaComponent.h"
-#include "Weapon/PAMusketProjectile.h"
 #include "Kismet/GameplayStatics.h"
-#include "Components/SphereComponent.h"
+#include "Weapon/PAMusket.h"
+#include "Weapon/PAHook.h"
+#include "Engine/World.h"
+#include "UI/PAPlayerHUDWidget.h"
 
 DEFINE_LOG_CATEGORY_STATIC(PlayerLog, All, All)
 
+//Constructor
 APAPlayerCharacter::APAPlayerCharacter() 
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    //Создание и привязка камеры
+    //Creating camera in scene
     CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
     CameraComponent->SetupAttachment(GetRootComponent());
-    check(CameraComponent != nullptr);
 
-    //Создание компонента выносливаости
+    //Creating stamina in scene
     StaminaComponent = CreateDefaultSubobject<UPAStaminaComponent>("StaminaComponent");
 
-    //Создание и привязка меша крюка
+    //Creating Hook Dummy with relative locations
     HookMesh = CreateDefaultSubobject<USkeletalMeshComponent>("HookMesh");
-    HookMesh->AttachToComponent(CameraComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-    HookMesh->CastShadow = false;
-    check(HookMesh != nullptr);
+    HookMesh->SetupAttachment(CameraComponent);
 
-    //Создание и привязка меша мушкета
+    //Creating Musket Dummy with relative locations
     MusketMesh = CreateDefaultSubobject<USkeletalMeshComponent>("MusketMesh");
-    MusketMesh->AttachToComponent(CameraComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-    MusketMesh->CastShadow = false;
-    check(MusketMesh != nullptr);
-
+    MusketMesh->SetupAttachment(CameraComponent);
 }
 
-//Метод, вызываемый в начале игрового процесса
+//Called when the game starts
 void APAPlayerCharacter::BeginPlay() 
 {
     Super::BeginPlay();
-
-    //Динамически вызывает функцию OnStaminaChanged
+    
+    //Bind the OnStaminaChanged event to the OnStaminaChanged function in this class
     StaminaComponent->OnStaminaChanged.AddUObject(this, &APAPlayerCharacter::OnStaminaChanged);
+    SpawnMusket();
+    SpawnHook();
 }
 
-//Бинды функций на клавиши
+//Method for game bindings
 void APAPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) 
 {
     Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+    //Movement axis bindings
     PlayerInputComponent->BindAxis("MoveForward", this, &APAPlayerCharacter::MoveForward);
     PlayerInputComponent->BindAxis("MoveRight", this, &APAPlayerCharacter::MoveRight);
     PlayerInputComponent->BindAxis("LookUp", this, &APAPlayerCharacter::LookUp);
     PlayerInputComponent->BindAxis("TurnAround", this, &APAPlayerCharacter::TurnAround);
+
+    //Action bindings
     PlayerInputComponent->BindAction("Run", IE_Pressed, this, &APAPlayerCharacter::StartRunning);
     PlayerInputComponent->BindAction("Run", IE_Released, this, &APAPlayerCharacter::StopRunning);
     PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &APAPlayerCharacter::Jump);
     PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &APAPlayerCharacter::StartCrouch);
     PlayerInputComponent->BindAction("Crouch", IE_Released, this, &APAPlayerCharacter::StopCrouch);
     PlayerInputComponent->BindAction("MusketShot", IE_Pressed, this, &APAPlayerCharacter::MusketShot);
+    PlayerInputComponent->BindAction("MusketReload", IE_Pressed, this, &APAPlayerCharacter::MusketReload);
     PlayerInputComponent->BindAction("HookHit", IE_Pressed, this, &APAPlayerCharacter::HookHit);
 
 }
 
-//Метод вызывающийся каждый тик игры.
+//Called every tick when the game starts
 void APAPlayerCharacter::Tick(float DeltaTime) 
 {
     Super::Tick(DeltaTime);
@@ -77,7 +80,7 @@ void APAPlayerCharacter::Tick(float DeltaTime)
     }
 }
 
-//Метод движения вперёд-назад
+//Move forward-backward
 void APAPlayerCharacter::MoveForward(float Amount)
 {
     if (Amount != 0.0f)
@@ -91,7 +94,7 @@ void APAPlayerCharacter::MoveForward(float Amount)
     }
 }
 
-//Метод движения вправо-влево
+//Move left-right
 void APAPlayerCharacter::MoveRight(float Amount) 
 {
     if (Amount != 0.0f)
@@ -100,23 +103,22 @@ void APAPlayerCharacter::MoveRight(float Amount)
     }
 }
 
-//Метод вертикального вращения камеры
+//Look up-down
 void APAPlayerCharacter::LookUp (float Amount)
 {
     AddControllerPitchInput(Amount);
 }
 
-//Метод горизонтального вращения камеры
+//Look left-right
 void APAPlayerCharacter::TurnAround(float Amount)
 {
     AddControllerYawInput(Amount);
 
 } 
 
-//Метод изменения выносливости
+//Method of stamina change
 void APAPlayerCharacter::OnStaminaChanged(float Stamina)
 {
-    UE_LOG(PlayerLog, Display, TEXT("Stamina: %.0f"), Stamina);
     if (bIsMovingForward)
     {
         if (!bIsRunning)
@@ -140,12 +142,10 @@ void APAPlayerCharacter::OnStaminaChanged(float Stamina)
     }
 }
 
-//Метод начала бега
 void APAPlayerCharacter::StartRunning()
 {
     if (StaminaComponent && StaminaComponent->CanRun() && bIsMovingForward)
     {
-        UE_LOG(PlayerLog, Display, TEXT("Start Running"));
         bIsRunning = true;
         GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
         StaminaComponent->StopRecoveringStamina();
@@ -153,12 +153,10 @@ void APAPlayerCharacter::StartRunning()
     }
 }
 
-//Метод окончания бега
 void APAPlayerCharacter::StopRunning()
 {
     if (StaminaComponent)
     {
-        UE_LOG(PlayerLog, Display, TEXT("Stop Running"));
         bIsRunning = false;
         GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
         StaminaComponent->StopDrainingStamina();
@@ -166,45 +164,54 @@ void APAPlayerCharacter::StopRunning()
     }
 }
 
-//Метод начала приседания
 void APAPlayerCharacter::StartCrouch()
 {
     Crouch();
 }
 
-//Метод окончания приседания
 void APAPlayerCharacter::StopCrouch() 
 {
     UnCrouch();
 }
 
-//Метод выстрела снаряда из мушкета
-void APAPlayerCharacter::MusketShot() 
+void APAPlayerCharacter::SpawnMusket()
 {
-    const FTransform SpawnTransform(MusketMesh->GetSocketRotation("MuzzleSocket"), MusketMesh->GetSocketLocation("MuzzleSocket"));
-    APAMusketProjectile* Projectile = GetWorld()->SpawnActorDeferred<APAMusketProjectile>(ProjectileClass, SpawnTransform);
 
-    if (Projectile)
-    {
-        FVector Direction = MusketMesh->GetSocketRotation("MuzzleSocket").Vector();
-        Projectile->SetShotDirection(Direction);
-        Projectile->SetOwner(GetOwner());
-        Projectile->FinishSpawning(SpawnTransform);
-    }
+    Musket = GetWorld()->SpawnActor<APAMusket>(MusketClass);
+    if (!Musket) return;
 
-    if (MusketShotSound != nullptr)
-    {
-        UGameplayStatics::PlaySoundAtLocation(this, MusketShotSound, MusketMesh->GetSocketLocation("MuzzleSocket"));
-    }
+    FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
+    Musket->AttachToComponent(MusketMesh, AttachmentRules, "");
 }
 
-//Метод удара крюком
+void APAPlayerCharacter::SpawnHook()
+{
+    Hook = GetWorld()->SpawnActor<APAHook>(HookClass);
+    if (!Hook) return;
+
+    FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
+    Hook->AttachToComponent(HookMesh, AttachmentRules, "");
+}
+
+void APAPlayerCharacter::MusketShot()
+{
+   Musket->Fire();
+}
+
+void APAPlayerCharacter::MusketReload()
+{
+   Musket->Reload();
+}
+
 void APAPlayerCharacter::HookHit()
 {
-    UE_LOG(PlayerLog, Warning, TEXT("HIT"));
+   Hook->MakeHit();
+}
 
-    if (HookHitSound != nullptr)
-    {
-        UGameplayStatics::PlaySoundAtLocation(this, HookHitSound, GetActorLocation());
-    }
+void APAPlayerCharacter::OnDeath()
+{
+    Super::OnDeath();
+
+    Musket->Destroy();
+    Hook->Destroy();
 }

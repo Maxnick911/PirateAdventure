@@ -5,8 +5,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/PAHealthComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/TextRenderComponent.h"
-#include <Kismet/GameplayStatics.h>
+#include "Kismet/GameplayStatics.h"
 
 DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All, All)
 

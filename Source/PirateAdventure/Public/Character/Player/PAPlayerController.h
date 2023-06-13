@@ -6,12 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "PAPlayerController.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class PIRATEADVENTURE_API APAPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
 };
